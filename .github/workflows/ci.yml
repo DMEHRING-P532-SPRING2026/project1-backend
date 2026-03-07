@@ -38,7 +38,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.PAT_TOKEN }}
       - run: |
           docker build -t ghcr.io/dmehring-p532-spring2026/project1-backend:latest .
           docker push ghcr.io/dmehring-p532-spring2026/project1-backend:latest
