@@ -1,5 +1,6 @@
 package iu.devinmehringer.project1.service;
 
+import iu.devinmehringer.project1.decorator.Notifier;
 import iu.devinmehringer.project1.dto.trade.TradeRequest;
 import iu.devinmehringer.project1.exception.InvalidTradeException;
 import iu.devinmehringer.project1.factory.LimitOrderFactory;
@@ -42,6 +43,9 @@ class TradeServiceTest {
 
     @InjectMocks
     private TradeService tradeService;
+
+    @Mock
+    private Notifier notifier;
 
     private User user;
     private Stock stock;

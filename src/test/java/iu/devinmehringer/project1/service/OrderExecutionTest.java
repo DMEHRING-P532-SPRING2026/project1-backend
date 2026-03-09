@@ -8,6 +8,7 @@ import iu.devinmehringer.project1.model.trade.Trade;
 import iu.devinmehringer.project1.model.trade.TradeStatus;
 import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.repository.TradeRepository;
+import iu.devinmehringer.project1.decorator.Notifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +36,9 @@ public class OrderExecutionTest {
     @Mock
     private Map<String, OrderFactory> factories;
 
+    @Mock
+    private Notifier notifier;
+
     @InjectMocks
     private TradeService tradeService;
 
@@ -42,6 +46,7 @@ public class OrderExecutionTest {
     private Stock stock;
     private Trade marketBuy;
     private Trade marketSell;
+
 
     @BeforeEach
     void setUp() {

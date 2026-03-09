@@ -1,5 +1,6 @@
 package iu.devinmehringer.project1.service;
 
+import iu.devinmehringer.project1.decorator.Notifier;
 import iu.devinmehringer.project1.factory.OrderFactory;
 import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.model.trade.ConditionType;
@@ -42,8 +43,12 @@ class LimitOrderTest {
     @InjectMocks
     private TradeService tradeService;
 
+    @Mock
+    private Notifier notifier;
+
     private User user;
     private Stock stock;
+
 
     @BeforeEach
     void setUp() {
