@@ -7,6 +7,7 @@ import iu.devinmehringer.project1.model.trade.Side;
 import java.math.BigDecimal;
 
 public class TradeRequest {
+    private Long userID;
     private OrderType orderType;
     private String ticker;
     private Integer quantity;
@@ -60,5 +61,13 @@ public class TradeRequest {
 
     public void setConditionType(ConditionType conditionType) {
         this.conditionType = conditionType;
+    }
+
+    public Long getUserID() {
+        return userID;
+    }
+
+    public void setUserID(Long userID) {
+        this.userID = userID;
     }
 }

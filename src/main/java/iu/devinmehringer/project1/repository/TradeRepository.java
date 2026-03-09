@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface TradeRepository extends JpaRepository<Trade, Long> {
     List<Trade> findByStatus(TradeStatus status);
+    List<Trade> findByStatusIn(List<TradeStatus> statuses);
 }

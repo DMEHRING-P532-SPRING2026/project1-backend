@@ -1,58 +1,26 @@
-package iu.devinmehringer.project1.model.trade;
+package iu.devinmehringer.project1.dto.trade;
 
-import iu.devinmehringer.project1.model.user.User;
-import jakarta.persistence.*;
+import iu.devinmehringer.project1.model.trade.ConditionType;
+import iu.devinmehringer.project1.model.trade.OrderType;
+import iu.devinmehringer.project1.model.trade.Side;
+import iu.devinmehringer.project1.model.trade.TradeStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-@Table(name = "trades")
-public class Trade {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
-    @Enumerated(EnumType.STRING)
+public class TradeResponse {
+    private Long userID;
     private OrderType orderType;
-
-    @ManyToOne
-    @JoinColumn(name="user_id")
-    private User user;
-
     private String ticker;
     private Integer quantity;
-    @Enumerated(EnumType.STRING)
     private Side side;
-    @Enumerated(EnumType.STRING)
-    private TradeStatus status;
-
     private BigDecimal price;
     private BigDecimal totalPrice;
-
     private LocalDateTime createdAt;
     private LocalDateTime executedAt;
-
-    public Trade() {}
-
-    public Trade(User user, OrderType orderType, String ticker, Integer quantity, Side side, TradeStatus status) {
-        this.user = user;
-        this.orderType = orderType;
-        this.ticker = ticker;
-        this.quantity = quantity;
-        this.side = side;
-        this.status = status;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private BigDecimal limitPrice;
+    private ConditionType type;
+    private TradeStatus status;
 
     public OrderType getOrderType() {
         return orderType;
@@ -84,14 +52,6 @@ public class Trade {
 
     public void setSide(Side side) {
         this.side = side;
-    }
-
-    public TradeStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(TradeStatus status) {
-        this.status = status;
     }
 
     public BigDecimal getPrice() {
@@ -126,11 +86,35 @@ public class Trade {
         this.executedAt = executedAt;
     }
 
-    public User getUser() {
-        return user;
+    public ConditionType getType() {
+        return type;
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    public void setType(ConditionType type) {
+        this.type = type;
+    }
+
+    public BigDecimal getLimitPrice() {
+        return limitPrice;
+    }
+
+    public void setLimitPrice(BigDecimal limitPrice) {
+        this.limitPrice = limitPrice;
+    }
+
+    public Long getUserID() {
+        return userID;
+    }
+
+    public void setUserID(Long userID) {
+        this.userID = userID;
+    }
+
+    public TradeStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TradeStatus status) {
+        this.status = status;
     }
 }

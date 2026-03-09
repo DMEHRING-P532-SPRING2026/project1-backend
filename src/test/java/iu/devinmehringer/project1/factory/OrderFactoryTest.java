@@ -3,6 +3,7 @@ package iu.devinmehringer.project1.factory;
 import iu.devinmehringer.project1.dto.trade.TradeRequest;
 import iu.devinmehringer.project1.exception.UnknownOrderTypeException;
 import iu.devinmehringer.project1.model.trade.*;
+import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.repository.TradeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,10 +43,11 @@ public class OrderFactoryTest {
         tradeRequest.setTicker("AAPL");
         tradeRequest.setQuantity(10);
         tradeRequest.setSide(Side.BUY);
+        User user = new User();
 
         // Act
         OrderFactory factory = OrderFactory.getFactory(tradeRequest.getOrderType().name(), factories);
-        Trade result = factory.createOrder(tradeRequest);
+        Trade result = factory.createOrder(user, tradeRequest);
 
         // Assert
         assertThat(factory).isInstanceOf(MarketOrderFactory.class);
@@ -62,10 +64,11 @@ public class OrderFactoryTest {
         tradeRequest.setSide(Side.BUY);
         tradeRequest.setLimitPrice(BigDecimal.valueOf(145.00));
         tradeRequest.setConditionType(ConditionType.GREATER_THAN);
+        User user = new User();
 
         // Act
         OrderFactory factory = OrderFactory.getFactory(tradeRequest.getOrderType().name(), factories);
-        Trade result = factory.createOrder(tradeRequest);
+        Trade result = factory.createOrder(user, tradeRequest);
 
         // Assert
         assertThat(factory).isInstanceOf(LimitOrderFactory.class);

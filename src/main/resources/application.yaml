@@ -13,3 +13,10 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate:
       ddl-auto: create-drop
+
+price:
+  update:
+    rate: 5000
+user:
+  default:
+    balance: 10000.00
