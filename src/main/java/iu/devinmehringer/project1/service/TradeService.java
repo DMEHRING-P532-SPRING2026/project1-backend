@@ -114,7 +114,7 @@ public class TradeService implements Observer {
             sellTrade((Order)trade, stock);
         }
         userService.sendUserUpdate(trade.getUser());
-        webSocketService.sendExecutedTradeUpdate(getAllPendingByUser(trade.getUser()), trade.getUser());
+        webSocketService.sendPendingTradeUpdate(getAllPendingByUser(trade.getUser()), trade.getUser());
         webSocketService.sendExecutedTradeUpdate(getAllExecutedAndByUser(trade.getUser()), trade.getUser());
     }
 
