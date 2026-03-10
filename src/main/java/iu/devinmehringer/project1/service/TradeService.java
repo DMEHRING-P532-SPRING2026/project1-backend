@@ -55,11 +55,11 @@ public class TradeService implements Observer {
                 .orElse(List.of());
     }
 
-    public List<Trade> getAllExecutedAndByUser(User user) {
+    public List<Trade> getAllExecutedByUser(User user) {
         return tradeRepository.findByStatusInAndUser(List.of(TradeStatus.FAILED, TradeStatus.COMPLETED), user);
     }
 
-    public List<Trade> getAllExecutedAndByUser(Long userID) {
+    public List<Trade> getAllExecutedByUser(Long userID) {
         return userService.getUser(userID)
                 .map(user -> tradeRepository.findByStatusInAndUser(List.of(TradeStatus.FAILED, TradeStatus.COMPLETED), user))
                 .orElse(List.of());
@@ -84,7 +84,7 @@ public class TradeService implements Observer {
 
     public void sendTradeUpdates(User user, Trade trade) {
         webSocketService.sendPendingTradeUpdate(getAllPendingByUser(trade.getUser()), trade.getUser());
-        webSocketService.sendExecutedTradeUpdate(getAllExecutedAndByUser(trade.getUser()), trade.getUser());
+        webSocketService.sendExecutedTradeUpdate(getAllExecutedByUser(trade.getUser()), trade.getUser());
     }
 
     public Trade createTrade(TradeRequest request) {
