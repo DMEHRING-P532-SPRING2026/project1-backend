@@ -42,6 +42,9 @@ public class OrderExecutionTest {
     @InjectMocks
     private TradeService tradeService;
 
+    @Mock
+    private WebSocketService webSocketService;
+
     private User user;
     private Stock stock;
     private Trade marketBuy;

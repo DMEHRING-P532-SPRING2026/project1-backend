@@ -47,6 +47,9 @@ class TradeServiceTest {
     @Mock
     private Notifier notifier;
 
+    @Mock
+    private WebSocketService webSocketService;
+
     private User user;
     private Stock stock;
 

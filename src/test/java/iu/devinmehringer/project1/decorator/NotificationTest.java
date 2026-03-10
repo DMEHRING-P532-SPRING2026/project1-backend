@@ -10,6 +10,7 @@ import iu.devinmehringer.project1.repository.TradeRepository;
 import iu.devinmehringer.project1.service.StockService;
 import iu.devinmehringer.project1.service.TradeService;
 import iu.devinmehringer.project1.service.UserService;
+import iu.devinmehringer.project1.service.WebSocketService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,10 +29,16 @@ class TradeServiceNotificationTest {
 
     @Mock
     private TradeRepository tradeRepository;
-    @Mock private UserService userService;
-    @Mock private StockService stockService;
-    @Mock private Map<String, OrderFactory> factories;
-    @Mock private Notifier notifier;
+    @Mock
+    private UserService userService;
+    @Mock
+    private StockService stockService;
+    @Mock
+    private Map<String, OrderFactory> factories;
+    @Mock
+    private Notifier notifier;
+    @Mock
+    private WebSocketService webSocketService;
 
     @InjectMocks
     private TradeService tradeService;
