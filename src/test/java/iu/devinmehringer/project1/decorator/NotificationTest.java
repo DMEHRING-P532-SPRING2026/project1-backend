@@ -3,6 +3,7 @@ package iu.devinmehringer.project1.decorator;
 import iu.devinmehringer.project1.factory.OrderFactory;
 import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.model.trade.MarketOrder;
+import iu.devinmehringer.project1.model.trade.Order;
 import iu.devinmehringer.project1.model.trade.Side;
 import iu.devinmehringer.project1.model.trade.TradeStatus;
 import iu.devinmehringer.project1.model.user.User;
@@ -24,31 +25,21 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TradeServiceNotificationTest {
 
-    @Mock
-    private TradeRepository tradeRepository;
-    @Mock
-    private UserService userService;
-    @Mock
-    private StockService stockService;
-    @Mock
-    private Map<String, OrderFactory> factories;
-    @Mock
-    private Notifier notifier;
-    @Mock
-    private WebSocketService webSocketService;
-    @Mock
-    private TradeUpdateService tradeUpdateService;
+    @Mock private TradeRepository tradeRepository;
+    @Mock private UserService userService;
+    @Mock private Map<String, OrderFactory> factories;
+    @Mock private Notifier notifier;
 
     @InjectMocks
-    private TradeService tradeService;
+    private TradeExecutionService tradeExecutionService;
 
     private User user;
+    private Stock stock;
 
     @BeforeEach
     void setUp() {
         user = new User(BigDecimal.valueOf(10000.00));
-        Stock stock = new Stock("AAPL", BigDecimal.valueOf(150.00));
-        lenient().when(stockService.getStockByTicker("AAPL")).thenReturn(stock);
+        stock = new Stock("AAPL", BigDecimal.valueOf(150.00));
     }
 
     @Test
@@ -58,7 +49,7 @@ class TradeServiceNotificationTest {
         when(userService.hasSufficientBalance(any(), any())).thenReturn(true);
 
         // Act
-        tradeService.executeTrade(order);
+        tradeExecutionService.buyTrade((Order) order, stock);
 
         // Assert
         verify(notifier).notify(contains("BUY executed"));
@@ -71,7 +62,7 @@ class TradeServiceNotificationTest {
         when(userService.userHasStockHoldingAndQuantity(any(), any(), any())).thenReturn(true);
 
         // Act
-        tradeService.executeTrade(order);
+        tradeExecutionService.sellTrade((Order) order, stock);
 
         // Assert
         verify(notifier).notify(contains("SELL executed"));
@@ -84,7 +75,7 @@ class TradeServiceNotificationTest {
         when(userService.hasSufficientBalance(any(), any())).thenReturn(false);
 
         // Act
-        tradeService.executeTrade(order);
+        tradeExecutionService.buyTrade((Order) order, stock);
 
         // Assert
         verify(notifier).notify(contains("Insufficient funds"));
@@ -97,7 +88,7 @@ class TradeServiceNotificationTest {
         when(userService.userHasStockHoldingAndQuantity(any(), any(), any())).thenReturn(false);
 
         // Act
-        tradeService.executeTrade(order);
+        tradeExecutionService.sellTrade((Order) order, stock);
 
         // Assert
         verify(notifier).notify(contains("Insufficient holdings"));

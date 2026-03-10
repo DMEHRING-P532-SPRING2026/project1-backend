@@ -26,10 +26,12 @@ public class TradeService implements Observer {
     private final StockService stockService;
     private final Notifier notifier;
     private final TradeUpdateService tradeUpdateService;
+    private final TradeExecutionService tradeExecutionService;
 
     public TradeService(TradeRepository tradeRepository, Map<String, OrderFactory> factories,
                         UserService userService, StockService stockService, Notifier notifier,
-                        TradeUpdateService tradeUpdateService) {
+                        TradeUpdateService tradeUpdateService, TradeExecutionService tradeExecutionService) {
+        this.tradeExecutionService = tradeExecutionService;
         this.tradeUpdateService = tradeUpdateService;
         this.tradeRepository = tradeRepository;
         this.factories = factories;
@@ -117,51 +119,15 @@ public class TradeService implements Observer {
 
     public void executeTrade(Trade trade) {
         Stock stock = stockService.getStockByTicker(trade.getTicker());
-        if (stock == null) {
-            throw new InvalidTradeException("Invalid stock");
-        }
+        if (stock == null) throw new InvalidTradeException("Invalid stock");
+
         if (trade.getSide() == Side.BUY) {
-           buyTrade((Order)trade, stock);
+            tradeExecutionService.buyTrade((Order) trade, stock);
         } else {
-            sellTrade((Order)trade, stock);
+            tradeExecutionService.sellTrade((Order) trade, stock);
         }
+
         userService.sendUserUpdate(trade.getUser());
         sendTradeUpdates(trade.getUser());
-    }
-
-    @Transactional
-    public void buyTrade(Order order, Stock stock) {
-        Trade trade = (Trade) order;
-        BigDecimal totalPrice = stock.getCurrentPrice().multiply(BigDecimal.valueOf(trade.getQuantity()));
-        if (!userService.hasSufficientBalance(trade.getUser(), totalPrice)) {
-            trade.setStatus(TradeStatus.FAILED);
-            trade.setExecutedAt(LocalDateTime.now());
-            tradeRepository.save(trade);
-            notifier.notify("Insufficient funds for BUY " + trade.getTicker() + " x" + trade.getQuantity());
-            return;
-        }
-        order.execute(stock.getCurrentPrice(), totalPrice);
-        userService.deductFunds(trade.getUser(), totalPrice);
-        userService.updateStockHoldingEntry(trade.getUser(), stock, trade);
-        tradeRepository.save(trade);
-        notifier.notify("BUY executed: " + trade.getTicker() + " x" + trade.getQuantity() + " @ " + stock.getCurrentPrice());
-    }
-
-    @Transactional
-    public void sellTrade(Order order, Stock stock) {
-        Trade trade = (Trade) order;
-        BigDecimal totalPrice = stock.getCurrentPrice().multiply(BigDecimal.valueOf(trade.getQuantity()));
-        if (!userService.userHasStockHoldingAndQuantity(trade.getUser(), stock, trade)) {
-            trade.setStatus(TradeStatus.FAILED);
-            trade.setExecutedAt(LocalDateTime.now());
-            tradeRepository.save(trade);
-            notifier.notify("Insufficient holdings for SELL " + trade.getTicker() + " x" + trade.getQuantity());
-            return;
-        }
-        order.execute(stock.getCurrentPrice(), totalPrice);
-        userService.addFunds(trade.getUser(), totalPrice);
-        userService.updateStockHoldingEntry(trade.getUser(), stock, trade);
-        tradeRepository.save(trade);
-        notifier.notify("SELL executed: " + trade.getTicker() + " x" + trade.getQuantity() + " @ " + stock.getCurrentPrice());
     }
 }

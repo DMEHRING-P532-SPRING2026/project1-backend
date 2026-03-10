@@ -13,7 +13,6 @@ import iu.devinmehringer.project1.repository.TradeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -29,29 +28,15 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class TradeServiceTest {
 
-    @Mock
-    private TradeRepository tradeRepository;
+    @Mock private TradeRepository tradeRepository;
+    @Mock private UserService userService;
+    @Mock private StockService stockService;
+    @Mock private Map<String, OrderFactory> factories;
+    @Mock private Notifier notifier;
+    @Mock private TradeUpdateService tradeUpdateService;
 
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private StockService stockService;
-
-    @Mock
-    private Map<String, OrderFactory> factories;
-
-    @InjectMocks
+    private TradeExecutionService tradeExecutionService;
     private TradeService tradeService;
-
-    @Mock
-    private Notifier notifier;
-
-    @Mock
-    private WebSocketService webSocketService;
-
-    @Mock
-    private TradeUpdateService tradeUpdateService;
 
     private User user;
     private Stock stock;
@@ -60,11 +45,15 @@ class TradeServiceTest {
     void setUp() {
         user = new User(BigDecimal.valueOf(10000.00));
         stock = new Stock("AAPL", BigDecimal.valueOf(150.00));
+
+        // Real TradeExecutionService so actual logic runs
+        tradeExecutionService = new TradeExecutionService(tradeRepository, userService, notifier);
+        tradeService = new TradeService(tradeRepository, factories, userService, stockService, notifier, tradeUpdateService, tradeExecutionService);
+
         lenient().when(stockService.getStockByTicker("AAPL")).thenReturn(stock);
         lenient().when(factories.get("MARKET")).thenReturn(new MarketOrderFactory());
         lenient().when(factories.get("LIMIT")).thenReturn(new LimitOrderFactory());
     }
-
 
     @Test
     void marketBuyShouldCreateHoldingWhenNoneExists() {
@@ -133,7 +122,6 @@ class TradeServiceTest {
         verify(userService, never()).addFunds(any(), any());
     }
 
-
     @Test
     void marketBuyShouldDeductCorrectAmountFromBalance() {
         // Arrange
@@ -161,7 +149,6 @@ class TradeServiceTest {
         // Assert
         verify(userService).addFunds(user, expectedTotal);
     }
-
 
     @Test
     void limitOrderShouldNotExecuteWhenConditionNotMet() {
@@ -215,8 +202,6 @@ class TradeServiceTest {
         assertThat(order1.getStatus()).isEqualTo(TradeStatus.COMPLETED);
         assertThat(order2.getStatus()).isEqualTo(TradeStatus.FAILED);
     }
-
-
 
     @Test
     void createTradeShouldThrowWhenTickerInvalid() {

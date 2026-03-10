@@ -4,11 +4,9 @@ import iu.devinmehringer.project1.dto.trade.TradeRequest;
 import iu.devinmehringer.project1.exception.UnknownOrderTypeException;
 import iu.devinmehringer.project1.model.trade.*;
 import iu.devinmehringer.project1.model.user.User;
-import iu.devinmehringer.project1.repository.TradeRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -19,9 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 public class OrderFactoryTest {
-
-    @Mock
-    private TradeRepository tradeRepository;
 
     private Map<String, OrderFactory> factories;
 

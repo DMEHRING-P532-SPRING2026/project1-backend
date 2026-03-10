@@ -5,6 +5,7 @@ import iu.devinmehringer.project1.factory.OrderFactory;
 import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.model.trade.ConditionType;
 import iu.devinmehringer.project1.model.trade.LimitOrder;
+import iu.devinmehringer.project1.model.trade.Order;
 import iu.devinmehringer.project1.model.trade.Side;
 import iu.devinmehringer.project1.model.trade.TradeStatus;
 import iu.devinmehringer.project1.model.user.User;
@@ -17,9 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
-import java.util.List;
 import java.util.Map;
-
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,33 +27,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class LimitOrderTest {
 
-    @Mock
-    private TradeRepository tradeRepository;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private StockService stockService;
-
-    @Mock
-    private Map<String, OrderFactory> factories;
+    @Mock private TradeRepository tradeRepository;
+    @Mock private UserService userService;
+    @Mock private Map<String, OrderFactory> factories;
+    @Mock private Notifier notifier;
 
     @InjectMocks
-    private TradeService tradeService;
-
-    @Mock
-    private Notifier notifier;
-
-    @Mock
-    private WebSocketService webSocketService;
-
-    @Mock
-    private TradeUpdateService tradeUpdateService;
+    private TradeExecutionService tradeExecutionService;
 
     private User user;
     private Stock stock;
-
 
     @BeforeEach
     void setUp() {
@@ -122,7 +104,6 @@ class LimitOrderTest {
         assertThat(order.checkConditions(stock)).isTrue();
     }
 
-
     @Test
     void executeShouldSetPriceAndTotalPrice() {
         // Arrange
@@ -168,13 +149,10 @@ class LimitOrderTest {
         // Arrange
         LimitOrder limitOrder = new LimitOrder(user, "AAPL", 10, Side.BUY,
                 TradeStatus.PENDING, BigDecimal.valueOf(160.00), ConditionType.LESS_THAN);
-
-        when(tradeRepository.findByStatus(TradeStatus.PENDING)).thenReturn(List.of(limitOrder));
-        when(stockService.getStockByTicker("AAPL")).thenReturn(stock);
         when(userService.hasSufficientBalance(any(), any())).thenReturn(false);
 
         // Act
-        tradeService.update();
+        tradeExecutionService.buyTrade((Order) limitOrder, stock);
 
         // Assert
         assertThat(limitOrder.getStatus()).isEqualTo(TradeStatus.FAILED);
