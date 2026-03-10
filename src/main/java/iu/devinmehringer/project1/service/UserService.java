@@ -2,6 +2,7 @@ package iu.devinmehringer.project1.service;
 
 import iu.devinmehringer.project1.controller.UserController;
 import iu.devinmehringer.project1.exception.InvalidTradeException;
+import iu.devinmehringer.project1.exception.UserNotFoundException;
 import iu.devinmehringer.project1.model.StockHolding.StockHolding;
 import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.model.trade.Side;
@@ -10,6 +11,7 @@ import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.repository.StockHoldingRepository;
 import iu.devinmehringer.project1.repository.UserRepository;
 import jakarta.annotation.PostConstruct;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -95,8 +97,11 @@ public class UserService {
         return false;
     }
 
+    @Transactional
     public void sendUserUpdate(User user) {
-        this.webSocketService.sendUserUpdate(user);
+        User freshUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new UserNotFoundException(user.getId()));
+        webSocketService.sendUserUpdate(freshUser);
     }
 
 }
