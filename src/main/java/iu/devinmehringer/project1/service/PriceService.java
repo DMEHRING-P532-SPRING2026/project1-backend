@@ -1,5 +1,6 @@
 package iu.devinmehringer.project1.service;
 
+import iu.devinmehringer.project1.controller.StockController;
 import iu.devinmehringer.project1.exception.UnknownStrategyTypeException;
 import iu.devinmehringer.project1.observer.Observer;
 import iu.devinmehringer.project1.observer.Subject;
@@ -19,10 +20,12 @@ public class PriceService implements Subject {
     private final Map<String, PriceStrategy> strategies;
     private final List<Observer> observers = new ArrayList<>();
 
-    public PriceService(List<Tradeable<?>> tradeables, Map<String, PriceStrategy> strategies, TradeService tradeService) {
+    public PriceService(List<Tradeable<?>> tradeables, Map<String, PriceStrategy> strategies,
+                        TradeService tradeService, StockController stockController) {
         this.tradeables = tradeables;
         this.strategies = strategies;
         this.addObserver(tradeService);
+        this.addObserver(stockController);
     }
 
     @PostConstruct
