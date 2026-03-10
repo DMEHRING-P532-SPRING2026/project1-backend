@@ -3,6 +3,7 @@ package iu.devinmehringer.project1.controller;
 import iu.devinmehringer.project1.dto.trade.TradeRequest;
 import iu.devinmehringer.project1.dto.trade.TradeResponse;
 import iu.devinmehringer.project1.mapper.TradeMapper;
+import iu.devinmehringer.project1.observer.Observer;
 import iu.devinmehringer.project1.service.TradeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,4 +35,5 @@ public class TradeController {
     public ResponseEntity<TradeResponse> createTrade(@RequestBody TradeRequest request) {
         return ResponseEntity.ok(tradeMapper.toDTO(tradeService.createTrade(request)));
     }
+
 }

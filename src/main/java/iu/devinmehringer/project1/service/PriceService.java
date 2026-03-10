@@ -21,11 +21,10 @@ public class PriceService implements Subject {
     private final List<Observer> observers = new ArrayList<>();
 
     public PriceService(List<Tradeable<?>> tradeables, Map<String, PriceStrategy> strategies,
-                        TradeService tradeService, StockController stockController) {
+                        TradeService tradeService) {
         this.tradeables = tradeables;
         this.strategies = strategies;
         this.addObserver(tradeService);
-        this.addObserver(stockController);
     }
 
     @PostConstruct

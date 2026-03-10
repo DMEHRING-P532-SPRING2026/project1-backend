@@ -6,6 +6,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class UserResponse {
+    private Long userId;
     private BigDecimal balance;
     private BigDecimal totalPortfolioValue;
     private List<StockHoldingResponse> stockHoldingResponses;
@@ -32,5 +33,13 @@ public class UserResponse {
 
     public void setStockHoldingResponses(List<StockHoldingResponse> stockHoldingResponses) {
         this.stockHoldingResponses = stockHoldingResponses;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 }

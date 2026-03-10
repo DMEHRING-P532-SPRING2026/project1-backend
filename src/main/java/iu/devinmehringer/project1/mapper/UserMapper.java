@@ -18,6 +18,7 @@ public class UserMapper implements Mapper<User, UserResponse>{
     @Override
     public UserResponse toDTO(User entity) {
         UserResponse userResponse = new UserResponse();
+        userResponse.setUserId(entity.getId());
         userResponse.setBalance(entity.getBalance());
         userResponse.setTotalPortfolioValue(entity.getPortfolioValue());
         userResponse.setStockHoldingResponses(

@@ -1,5 +1,6 @@
 package iu.devinmehringer.project1.service;
 
+import iu.devinmehringer.project1.controller.UserController;
 import iu.devinmehringer.project1.exception.InvalidTradeException;
 import iu.devinmehringer.project1.model.StockHolding.StockHolding;
 import iu.devinmehringer.project1.model.stock.Stock;
@@ -21,10 +22,13 @@ public class UserService {
     private BigDecimal defaultBalance;
     private final UserRepository userRepository;
     private final StockHoldingRepository stockHoldingRepository;
+    private final WebSocketService webSocketService;
 
-    public UserService(UserRepository userRepository, StockHoldingRepository stockHoldingRepository) {
+    public UserService(UserRepository userRepository, StockHoldingRepository stockHoldingRepository,
+                       WebSocketService webSocketService) {
         this.userRepository = userRepository;
         this.stockHoldingRepository = stockHoldingRepository;
+        this.webSocketService = webSocketService;
     }
 
     @PostConstruct
@@ -91,5 +95,8 @@ public class UserService {
         return false;
     }
 
+    public void sendUserUpdate(User user) {
+        this.webSocketService.sendUserUpdate(user);
+    }
 
 }

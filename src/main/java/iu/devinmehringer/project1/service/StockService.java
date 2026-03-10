@@ -16,15 +16,18 @@ public class StockService implements Tradeable<Stock>, CommandLineRunner {
 
     private final StockRepository stockRepository;
     private PriceStrategy priceStrategy;
+    private final WebSocketService webSocketService;
 
-    public StockService(StockRepository stockRepository, PriceStrategy priceStrategy) {
+    public StockService(StockRepository stockRepository, PriceStrategy priceStrategy, WebSocketService webSocketService) {
         this.stockRepository = stockRepository;
         this.priceStrategy = priceStrategy;
+        this.webSocketService = webSocketService;
     }
 
     @Override
     public void updateAll() {
         stockRepository.findAll().forEach(this::updateOne);
+        webSocketService.sendStocks(getAllStocks());
     }
 
     @Override
