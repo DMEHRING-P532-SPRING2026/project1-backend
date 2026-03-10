@@ -37,12 +37,12 @@ public class WebSocketService {
 
     public void sendPendingTradeUpdate(List<Trade> trades, User user) {
         List<TradeResponse> tr = trades.stream().map(tradeMapper::toDTO).toList();
-        messagingTemplate.convertAndSend("/topic/trade/pending/" + user.getId(), trades);
+        messagingTemplate.convertAndSend("/topic/trade/pending/" + user.getId(), tr);
     }
 
     public void sendExecutedTradeUpdate(List<Trade> trades, User user) {
         List<TradeResponse> tr = trades.stream().map(tradeMapper::toDTO).toList();
-        messagingTemplate.convertAndSend("/topic/trade/executed/" + user.getId(), trades);
+        messagingTemplate.convertAndSend("/topic/trade/executed/" + user.getId(), tr);
     }
 
     public void sendStocks(List<Stock> stocks) {

@@ -1,6 +1,5 @@
 package iu.devinmehringer.project1.service;
 
-import iu.devinmehringer.project1.controller.TradeController;
 import iu.devinmehringer.project1.decorator.Notifier;
 import iu.devinmehringer.project1.dto.trade.TradeRequest;
 import iu.devinmehringer.project1.exception.InvalidTradeException;
@@ -10,14 +9,12 @@ import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.model.trade.*;
 import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.observer.Observer;
-import iu.devinmehringer.project1.observer.Subject;
 import iu.devinmehringer.project1.repository.TradeRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -28,17 +25,17 @@ public class TradeService implements Observer {
     private final UserService userService;
     private final StockService stockService;
     private final Notifier notifier;
-    private final WebSocketService webSocketService;
+    private final TradeUpdateService tradeUpdateService;
 
     public TradeService(TradeRepository tradeRepository, Map<String, OrderFactory> factories,
                         UserService userService, StockService stockService, Notifier notifier,
-                        WebSocketService webSocketService) {
+                        TradeUpdateService tradeUpdateService) {
+        this.tradeUpdateService = tradeUpdateService;
         this.tradeRepository = tradeRepository;
         this.factories = factories;
         this.userService = userService;
         this.stockService = stockService;
         this.notifier = notifier;
-        this.webSocketService = webSocketService;
     }
 
     public List<Trade> getAllPending() {
@@ -82,9 +79,8 @@ public class TradeService implements Observer {
         }
     }
 
-    public void sendTradeUpdates(User user, Trade trade) {
-        webSocketService.sendPendingTradeUpdate(getAllPendingByUser(trade.getUser()), trade.getUser());
-        webSocketService.sendExecutedTradeUpdate(getAllExecutedByUser(trade.getUser()), trade.getUser());
+    public void sendTradeUpdates(User user) {
+        tradeUpdateService.sendTradeUpdates(user);
     }
 
     public Trade createTrade(TradeRequest request) {
@@ -97,7 +93,7 @@ public class TradeService implements Observer {
         if (request.getOrderType() == OrderType.MARKET) {
             executeTrade(order);
         }
-        sendTradeUpdates(user, (Trade) order);
+        sendTradeUpdates(user);
         return order;
     }
 
@@ -130,7 +126,7 @@ public class TradeService implements Observer {
             sellTrade((Order)trade, stock);
         }
         userService.sendUserUpdate(trade.getUser());
-        sendTradeUpdates(trade.getUser(), trade);
+        sendTradeUpdates(trade.getUser());
     }
 
     @Transactional

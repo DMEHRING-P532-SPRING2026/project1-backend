@@ -7,10 +7,7 @@ import iu.devinmehringer.project1.model.trade.Side;
 import iu.devinmehringer.project1.model.trade.TradeStatus;
 import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.repository.TradeRepository;
-import iu.devinmehringer.project1.service.StockService;
-import iu.devinmehringer.project1.service.TradeService;
-import iu.devinmehringer.project1.service.UserService;
-import iu.devinmehringer.project1.service.WebSocketService;
+import iu.devinmehringer.project1.service.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,6 +36,8 @@ class TradeServiceNotificationTest {
     private Notifier notifier;
     @Mock
     private WebSocketService webSocketService;
+    @Mock
+    private TradeUpdateService tradeUpdateService;
 
     @InjectMocks
     private TradeService tradeService;

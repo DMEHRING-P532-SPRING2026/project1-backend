@@ -49,6 +49,9 @@ class LimitOrderTest {
     @Mock
     private WebSocketService webSocketService;
 
+    @Mock
+    private TradeUpdateService tradeUpdateService;
+
     private User user;
     private Stock stock;
 
