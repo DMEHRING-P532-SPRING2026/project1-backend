@@ -102,7 +102,6 @@ public class TradeService implements Observer {
     }
 
     @Override
-    @Transactional
     public void update() {
         List<Trade> pendingTrades = tradeRepository.findByStatus(TradeStatus.PENDING);
         for (Trade trade : pendingTrades) {
