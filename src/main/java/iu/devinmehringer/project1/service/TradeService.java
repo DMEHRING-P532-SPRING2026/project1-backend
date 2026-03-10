@@ -70,6 +70,11 @@ public class TradeService implements Observer {
         }
     }
 
+    public void sendTradeUpdates(User user, Trade trade) {
+        webSocketService.sendPendingTradeUpdate(getAllPendingByUser(trade.getUser()), trade.getUser());
+        webSocketService.sendExecutedTradeUpdate(getAllExecutedAndByUser(trade.getUser()), trade.getUser());
+    }
+
     public Trade createTrade(TradeRequest request) {
         validateTradeRequest(request);
         OrderFactory factory = OrderFactory.getFactory(request.getOrderType().name(), factories);
@@ -80,7 +85,7 @@ public class TradeService implements Observer {
         if (request.getOrderType() == OrderType.MARKET) {
             executeTrade(order);
         }
-        webSocketService.sendExecutedTradeUpdate(getAllPendingByUser(order.getUser()), order.getUser());
+        sendTradeUpdates(user, (Trade) order);
         return order;
     }
 
@@ -114,8 +119,7 @@ public class TradeService implements Observer {
             sellTrade((Order)trade, stock);
         }
         userService.sendUserUpdate(trade.getUser());
-        webSocketService.sendPendingTradeUpdate(getAllPendingByUser(trade.getUser()), trade.getUser());
-        webSocketService.sendExecutedTradeUpdate(getAllExecutedAndByUser(trade.getUser()), trade.getUser());
+        sendTradeUpdates(trade.getUser(), trade);
     }
 
     @Transactional
