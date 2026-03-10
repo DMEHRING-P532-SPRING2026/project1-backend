@@ -26,6 +26,16 @@ public class TradeController {
         return ResponseEntity.ok(tradeService.getAllPending().stream().map(tradeMapper::toDTO).toList());
     }
 
+    @GetMapping("/pending/{userId}")
+    public ResponseEntity<List<TradeResponse>> getAllPendingByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(tradeService.getAllPendingByUser(userId).stream().map(tradeMapper::toDTO).toList());
+    }
+
+    @GetMapping("/completed/{userId}")
+    public ResponseEntity<List<TradeResponse>> getAllExecutedByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(tradeService.getAllExecutedByUser(userId).stream().map(tradeMapper::toDTO).toList());
+    }
+
     @GetMapping("/completed")
     public ResponseEntity<List<TradeResponse>> getAllExecuted() {
         return ResponseEntity.ok(tradeService.getAllExecuted().stream().map(tradeMapper::toDTO).toList());

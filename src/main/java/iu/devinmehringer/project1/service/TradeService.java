@@ -49,8 +49,20 @@ public class TradeService implements Observer {
         return tradeRepository.findByStatusAndUser(TradeStatus.PENDING, user);
     }
 
+    public List<Trade> getAllPendingByUser(Long userID) {
+        return userService.getUser(userID)
+                .map(user -> tradeRepository.findByStatusAndUser(TradeStatus.PENDING, user))
+                .orElse(List.of());
+    }
+
     public List<Trade> getAllExecutedAndByUser(User user) {
         return tradeRepository.findByStatusInAndUser(List.of(TradeStatus.FAILED, TradeStatus.COMPLETED), user);
+    }
+
+    public List<Trade> getAllExecutedAndByUser(Long userID) {
+        return userService.getUser(userID)
+                .map(user -> tradeRepository.findByStatusInAndUser(List.of(TradeStatus.FAILED, TradeStatus.COMPLETED), user))
+                .orElse(List.of());
     }
 
     public List<Trade> getAllExecuted() {
