@@ -2,6 +2,7 @@ package iu.devinmehringer.project1.service;
 
 import iu.devinmehringer.project1.controller.StockController;
 import iu.devinmehringer.project1.exception.UnknownStrategyTypeException;
+import iu.devinmehringer.project1.model.stock.PriceStrategyType;
 import iu.devinmehringer.project1.observer.Observer;
 import iu.devinmehringer.project1.observer.Subject;
 import iu.devinmehringer.project1.strategy.PriceStrategy;
@@ -36,6 +37,16 @@ public class PriceService implements Subject {
             }
             tradeable.setPriceStrategy(priceStrategy);
         }
+    }
+
+    public void setStrategyStock(PriceStrategyType type) {
+        PriceStrategy strategy = strategies.get(type.name());
+        if (strategy == null) {
+            throw new UnknownStrategyTypeException(type.name());
+        }
+        tradeables.stream()
+                .filter(t -> t instanceof StockService)
+                .forEach(t -> t.setPriceStrategy(strategy));
     }
 
     @Scheduled(fixedRateString = "${price.update.rate}")

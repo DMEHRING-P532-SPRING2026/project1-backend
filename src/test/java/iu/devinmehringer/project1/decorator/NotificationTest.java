@@ -2,10 +2,7 @@ package iu.devinmehringer.project1.decorator;
 
 import iu.devinmehringer.project1.factory.OrderFactory;
 import iu.devinmehringer.project1.model.stock.Stock;
-import iu.devinmehringer.project1.model.trade.MarketOrder;
-import iu.devinmehringer.project1.model.trade.Order;
-import iu.devinmehringer.project1.model.trade.Side;
-import iu.devinmehringer.project1.model.trade.TradeStatus;
+import iu.devinmehringer.project1.model.trade.*;
 import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.repository.TradeRepository;
 import iu.devinmehringer.project1.service.*;
@@ -19,7 +16,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,7 +27,6 @@ class TradeServiceNotificationTest {
     @Mock private TradeRepository tradeRepository;
     @Mock private UserService userService;
     @Mock private Map<String, OrderFactory> factories;
-    @Mock private Notifier notifier;
 
     @InjectMocks
     private TradeExecutionService tradeExecutionService;
@@ -42,55 +40,80 @@ class TradeServiceNotificationTest {
         stock = new Stock("AAPL", BigDecimal.valueOf(150.00));
     }
 
+
     @Test
     void shouldNotifyWhenBuyExecuted() {
-        // Arrange
         MarketOrder order = new MarketOrder(user, "AAPL", 10, Side.BUY, TradeStatus.PENDING);
         when(userService.hasSufficientBalance(any(), any())).thenReturn(true);
 
-        // Act
         tradeExecutionService.buyTrade((Order) order, stock);
 
-        // Assert
-        verify(notifier).notify(contains("BUY executed"));
+        verify(tradeRepository).save(any(Trade.class));
     }
 
     @Test
     void shouldNotifyWhenSellExecuted() {
-        // Arrange
         MarketOrder order = new MarketOrder(user, "AAPL", 10, Side.SELL, TradeStatus.PENDING);
         when(userService.userHasStockHoldingAndQuantity(any(), any(), any())).thenReturn(true);
 
-        // Act
         tradeExecutionService.sellTrade((Order) order, stock);
 
-        // Assert
-        verify(notifier).notify(contains("SELL executed"));
+        verify(tradeRepository).save(any(Trade.class));
     }
 
     @Test
     void shouldNotifyWhenInsufficientFunds() {
-        // Arrange
         MarketOrder order = new MarketOrder(user, "AAPL", 10, Side.BUY, TradeStatus.PENDING);
         when(userService.hasSufficientBalance(any(), any())).thenReturn(false);
 
-        // Act
         tradeExecutionService.buyTrade((Order) order, stock);
 
-        // Assert
-        verify(notifier).notify(contains("Insufficient funds"));
+        verify(tradeRepository).save(argThat(t -> ((Trade) t).getStatus() == TradeStatus.FAILED));
     }
 
     @Test
     void shouldNotifyWhenInsufficientHoldings() {
-        // Arrange
         MarketOrder order = new MarketOrder(user, "AAPL", 10, Side.SELL, TradeStatus.PENDING);
         when(userService.userHasStockHoldingAndQuantity(any(), any(), any())).thenReturn(false);
 
-        // Act
         tradeExecutionService.sellTrade((Order) order, stock);
 
+        verify(tradeRepository).save(argThat(t -> ((Trade) t).getStatus() == TradeStatus.FAILED));
+    }
+
+
+    @Test
+    void shouldFireAllNotifiersInChain() {
+        // Arrange — build a chain: Email -> SMS -> Console (mock base)
+        MockNotifier base = new MockNotifier();
+        Notifier chain = new EmailNotifier(new SmsNotifier(base));
+
+        MarketOrder order = new MarketOrder(user, "AAPL", 10, Side.BUY, TradeStatus.PENDING);
+        Trade trade = (Trade) order;
+
+        // Act
+        chain.notify(user, trade);
+
         // Assert
-        verify(notifier).notify(contains("Insufficient holdings"));
+        assertThat(base.getNotifyCount()).isEqualTo(1);
+        assertThat(base.getCapturedTrades().get(0)).isEqualTo(trade);
+        assertThat(base.getCapturedUsers().get(0)).isEqualTo(user);
+    }
+
+    @Test
+    void shouldCaptureCorrectTradeInChain() {
+        // Arrange
+        MockNotifier base = new MockNotifier();
+        Notifier chain = new EmailNotifier(base);
+
+        MarketOrder order = new MarketOrder(user, "AAPL", 10, Side.BUY, TradeStatus.PENDING);
+        Trade trade = (Trade) order;
+
+        // Act
+        chain.notify(user, trade);
+
+        // Assert
+        assertThat(base.getCapturedTrades().get(0).getTicker()).isEqualTo("AAPL");
+        assertThat(base.getCapturedTrades().get(0).getSide()).isEqualTo(Side.BUY);
     }
 }

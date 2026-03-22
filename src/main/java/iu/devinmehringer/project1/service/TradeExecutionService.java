@@ -1,10 +1,11 @@
 package iu.devinmehringer.project1.service;
 
-import iu.devinmehringer.project1.decorator.Notifier;
+import iu.devinmehringer.project1.decorator.*;
 import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.model.trade.Order;
 import iu.devinmehringer.project1.model.trade.Trade;
 import iu.devinmehringer.project1.model.trade.TradeStatus;
+import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.repository.TradeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,11 +19,14 @@ public class TradeExecutionService {
     private final TradeRepository tradeRepository;
     private final UserService userService;
     private final Notifier notifier;
+    private final WebSocketService webSocketService;
 
-    public TradeExecutionService(TradeRepository tradeRepository, UserService userService, Notifier notifier) {
+    public TradeExecutionService(TradeRepository tradeRepository, UserService userService, Notifier notifier,
+                                 WebSocketService webSocketService) {
         this.tradeRepository = tradeRepository;
         this.userService = userService;
         this.notifier = notifier;
+        this.webSocketService = webSocketService;
     }
 
     @Transactional
@@ -33,14 +37,16 @@ public class TradeExecutionService {
             trade.setStatus(TradeStatus.FAILED);
             trade.setExecutedAt(LocalDateTime.now());
             tradeRepository.save(trade);
-            notifier.notify("Insufficient funds for BUY " + trade.getTicker() + " x" + trade.getQuantity());
+            Notifier notifier = buildNotifier(trade.getUser());
+            notifier.notify(trade.getUser(), trade);
             return;
         }
         order.execute(stock.getCurrentPrice(), totalPrice);
         userService.deductFunds(trade.getUser(), totalPrice);
         userService.updateStockHoldingEntry(trade.getUser(), stock, trade);
         tradeRepository.save(trade);
-        notifier.notify("BUY executed: " + trade.getTicker() + " x" + trade.getQuantity() + " @ " + stock.getCurrentPrice());
+        Notifier notifier = buildNotifier(trade.getUser());
+        notifier.notify(trade.getUser(), trade);
     }
 
     @Transactional
@@ -51,13 +57,25 @@ public class TradeExecutionService {
             trade.setStatus(TradeStatus.FAILED);
             trade.setExecutedAt(LocalDateTime.now());
             tradeRepository.save(trade);
-            notifier.notify("Insufficient holdings for SELL " + trade.getTicker() + " x" + trade.getQuantity());
+            Notifier notifier = buildNotifier(trade.getUser());
+            notifier.notify(trade.getUser(), trade);
             return;
         }
         order.execute(stock.getCurrentPrice(), totalPrice);
         userService.addFunds(trade.getUser(), totalPrice);
         userService.updateStockHoldingEntry(trade.getUser(), stock, trade);
         tradeRepository.save(trade);
-        notifier.notify("SELL executed: " + trade.getTicker() + " x" + trade.getQuantity() + " @ " + stock.getCurrentPrice());
+        Notifier notifier = buildNotifier(trade.getUser());
+        notifier.notify(trade.getUser(), trade);
+    }
+
+    private Notifier buildNotifier(User user) {
+        Notifier notifier = new ConsoleNotifier(); // base, always on
+
+        if (user.isEmailEnabled())     notifier = new EmailNotifier(notifier);
+        if (user.isSmsEnabled())       notifier = new SmsNotifier(notifier);
+        if (user.isDashboardEnabled()) notifier = new DashboardNotifier(notifier, webSocketService);
+
+        return notifier;
     }
 }

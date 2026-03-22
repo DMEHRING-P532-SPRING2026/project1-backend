@@ -12,12 +12,16 @@ import java.util.List;
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private BigDecimal balance;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<StockHolding> holdings = new ArrayList<>();
+
+    private boolean emailEnabled;
+    private boolean smsEnabled;
+    private boolean dashboardEnabled;
 
     public User() {}
 
@@ -58,5 +62,29 @@ public class User {
 
     public void setHoldings(List<StockHolding> holdings) {
         this.holdings = holdings;
+    }
+
+    public boolean isEmailEnabled() {
+        return emailEnabled;
+    }
+
+    public void setEmailEnabled(boolean emailEnabled) {
+        this.emailEnabled = emailEnabled;
+    }
+
+    public boolean isSmsEnabled() {
+        return smsEnabled;
+    }
+
+    public void setSmsEnabled(boolean smsEnabled) {
+        this.smsEnabled = smsEnabled;
+    }
+
+    public boolean isDashboardEnabled() {
+        return dashboardEnabled;
+    }
+
+    public void setDashboardEnabled(boolean dashboardEnabled) {
+        this.dashboardEnabled = dashboardEnabled;
     }
 }

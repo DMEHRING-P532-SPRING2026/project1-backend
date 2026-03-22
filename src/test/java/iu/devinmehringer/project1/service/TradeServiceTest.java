@@ -34,6 +34,7 @@ class TradeServiceTest {
     @Mock private Map<String, OrderFactory> factories;
     @Mock private Notifier notifier;
     @Mock private TradeUpdateService tradeUpdateService;
+    @Mock private WebSocketService webSocketService;
 
     private TradeExecutionService tradeExecutionService;
     private TradeService tradeService;
@@ -47,7 +48,7 @@ class TradeServiceTest {
         stock = new Stock("AAPL", BigDecimal.valueOf(150.00));
 
         // Real TradeExecutionService so actual logic runs
-        tradeExecutionService = new TradeExecutionService(tradeRepository, userService, notifier);
+        tradeExecutionService = new TradeExecutionService(tradeRepository, userService, notifier, webSocketService);
         tradeService = new TradeService(tradeRepository, factories, userService, stockService, notifier, tradeUpdateService, tradeExecutionService);
 
         lenient().when(stockService.getStockByTicker("AAPL")).thenReturn(stock);

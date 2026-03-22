@@ -1,5 +1,8 @@
 package iu.devinmehringer.project1.decorator;
 
+import iu.devinmehringer.project1.model.trade.Trade;
+import iu.devinmehringer.project1.model.user.User;
+
 public abstract class NotifierDecorator implements Notifier {
     protected final Notifier notifier;
 
@@ -8,7 +11,7 @@ public abstract class NotifierDecorator implements Notifier {
     }
 
     @Override
-    public void notify(String message) {
-        notifier.notify(message);
+    public void notify(User user, Trade trade) {
+        notifier.notify(user, trade);
     }
 }

@@ -26,6 +26,9 @@ public class UserMapper implements Mapper<User, UserResponse>{
                         .map(stockHoldingMapper::toDTO)
                         .collect(Collectors.toList())
         );
+        userResponse.setEmailEnabled(entity.isEmailEnabled());
+        userResponse.setSmsEnabled(entity.isSmsEnabled());
+        userResponse.setDashboardEnabled(entity.isDashboardEnabled());
         return userResponse;
     }
 }

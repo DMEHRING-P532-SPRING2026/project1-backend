@@ -4,12 +4,12 @@ import iu.devinmehringer.project1.model.stock.Stock;
 import iu.devinmehringer.project1.repository.StockRepository;
 import iu.devinmehringer.project1.strategy.PriceStrategy;
 import iu.devinmehringer.project1.strategy.Tradeable;
+import jakarta.annotation.PostConstruct;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class StockService implements Tradeable<Stock>, CommandLineRunner {
@@ -17,22 +17,27 @@ public class StockService implements Tradeable<Stock>, CommandLineRunner {
     private final StockRepository stockRepository;
     private PriceStrategy priceStrategy;
     private final WebSocketService webSocketService;
+    private final Map<Long, Stock> stockCache = new HashMap<>();
 
-    public StockService(StockRepository stockRepository, PriceStrategy priceStrategy, WebSocketService webSocketService) {
+    public StockService(StockRepository stockRepository, WebSocketService webSocketService) {
         this.stockRepository = stockRepository;
-        this.priceStrategy = priceStrategy;
         this.webSocketService = webSocketService;
+    }
+
+    @PostConstruct
+    public void init() {
+        stockRepository.findAll().forEach(s -> stockCache.put(s.getId(), s));
     }
 
     @Override
     public void updateAll() {
-        stockRepository.findAll().forEach(this::updateOne);
-        webSocketService.sendStocks(getAllStocks());
+        stockCache.values().forEach(this::updateOne);
+        webSocketService.sendStocks(new ArrayList<>(stockCache.values()));
     }
 
     @Override
     public void updateOne(Stock stock) {
-        BigDecimal newPrice = priceStrategy.nextStep(stock.getCurrentPrice());
+        BigDecimal newPrice = priceStrategy.nextStep(stock);
         stock.setCurrentPrice(newPrice);
         stockRepository.save(stock);
     }
@@ -52,6 +57,7 @@ public class StockService implements Tradeable<Stock>, CommandLineRunner {
         if (stockRepository.count() == 0) {
             stockRepository.saveAll(defaultStocks());
         }
+        stockRepository.findAll().forEach(s -> stockCache.put(s.getId(), s));
     }
 
     private List<Stock> defaultStocks() {

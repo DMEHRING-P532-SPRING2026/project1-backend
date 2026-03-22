@@ -1,17 +1,13 @@
 package iu.devinmehringer.project1.controller;
 
 
-import iu.devinmehringer.project1.dto.stock.StockResponse;
+import iu.devinmehringer.project1.dto.user.NotificationSettingsRequest;
 import iu.devinmehringer.project1.dto.user.UserResponse;
 import iu.devinmehringer.project1.mapper.UserMapper;
-import iu.devinmehringer.project1.model.user.User;
 import iu.devinmehringer.project1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
@@ -26,12 +22,17 @@ public class UserController {
         this.userMapper = userMapper;
     }
 
-    // Temp to see user info for week 1
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> getUser(@PathVariable Long id) {
         return userService.getUser(id)
                 .map(user -> ResponseEntity.ok(userMapper.toDTO(user)))
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/{id}/notifications")
+    public ResponseEntity<UserResponse> setNotifications(@PathVariable Long id,
+                                                         @RequestBody NotificationSettingsRequest request) {
+        return ResponseEntity.ok(userMapper.toDTO(userService.updateNotificationSettings(id, request)));
     }
 
 }

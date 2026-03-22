@@ -1,6 +1,5 @@
 package iu.devinmehringer.project1.service;
 
-import iu.devinmehringer.project1.dto.stock.StockResponse;
 import iu.devinmehringer.project1.dto.trade.TradeResponse;
 import iu.devinmehringer.project1.dto.user.UserResponse;
 import iu.devinmehringer.project1.mapper.StockMapper;
@@ -47,5 +46,9 @@ public class WebSocketService {
 
     public void sendStocks(List<Stock> stocks) {
         messagingTemplate.convertAndSend("/topic/stocks", stocks.stream().map(stockMapper::toDTO).toList());
+    }
+
+    public void sendAlert(Long userId) {
+        messagingTemplate.convertAndSend("/topic/alerts/" + userId, "Alert");
     }
 }

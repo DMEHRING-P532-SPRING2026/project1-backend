@@ -1,6 +1,7 @@
 package iu.devinmehringer.project1.service;
 
 import iu.devinmehringer.project1.controller.UserController;
+import iu.devinmehringer.project1.dto.user.NotificationSettingsRequest;
 import iu.devinmehringer.project1.exception.InvalidTradeException;
 import iu.devinmehringer.project1.exception.UserNotFoundException;
 import iu.devinmehringer.project1.model.StockHolding.StockHolding;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -36,9 +38,20 @@ public class UserService {
     @PostConstruct
     public void init() {
         if (userRepository.count() == 0) {
-            User user = new User(defaultBalance);
-            userRepository.save(user);
+            userRepository.saveAll(List.of(
+                    new User(defaultBalance),
+                    new User(defaultBalance),
+                    new User(defaultBalance)
+            ));
         }
+    }
+
+    public User updateNotificationSettings(Long id, NotificationSettingsRequest request) {
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
+        user.setEmailEnabled(request.isEmailEnabled());
+        user.setSmsEnabled(request.isSmsEnabled());
+        user.setDashboardEnabled(request.isDashboardEnabled());
+        return userRepository.save(user);
     }
 
     public Optional<User> getUser(Long id) {
